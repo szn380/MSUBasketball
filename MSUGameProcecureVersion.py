@@ -543,7 +543,7 @@ for year in range(1, 21):
         homeOffense = (teamOffense*2 + topThreeOff)/3 + random.random()*3 - 1.5
         homeDefense = (teamDefense*2 + topThreeDef)/3 + random.random()*3 - 1.5
         teamScore = int((homeOffense - opponent.Defense())*10 + 60)  + int(assistFactor)
-        opponentScore = int((opponent.Offense() - homeDefense)*10 + 60)
+        opponentScore = int((opponent.Offense() - homeDefense)*10 + 65)
         if teamScore - opponentScore >= 0:
             print("*  Swami Predicts: MSU by {}".format(teamScore - opponentScore))
         else:
@@ -580,10 +580,10 @@ for year in range(1, 21):
         ##################################################
         homeOffense = (teamOffense*2 + topThreeOff)/3 + random.random()*2 - 1
         homeDefense = (teamDefense*2 + topThreeDef)/3 + random.random()*2 - 1
-        print("DEBUG: blockFactor {}".format(int(blockFactor)))
+
         # determine points scored for this game
         teamScore = int((homeOffense - opponent.Defense())*10 + 60) + int(assistFactor)
-        opponentScore = int((opponent.Offense() - homeDefense)*10 + 60) - int(blockFactor)*2
+        opponentScore = int((opponent.Offense() - homeDefense)*10 + 65) - int(blockFactor)*2
         teamRebounds = int(teamScore/2)
         # adjust score if it is a tied score
         if teamScore == opponentScore:
@@ -736,9 +736,9 @@ for year in range(1, 21):
             player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across games
             player[GAMEBLOCKS] = int(startingBlocks[index]/totalBlockFactor*blocksTotal)
             player[SEASONBLOCKS] += player[GAMEBLOCKS]  # accumlate scores across games
-            print("*\t{}\t{:10}\t{}\t\tAvg: {:4.3}\t\tReb: {}\t\tAvg: {:4.3}\t\tAst: {}\t\tAvg: {:4.3}\t\tBlk: {}\t\tAvg: {:4.3}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
-                  "".format(index1, player[NAME], player[GAMESCORE], player[SEASONTOTAL]/gameNumber, player[GAMEREBOUNDS], player[SEASONREBOUNDS]/gameNumber,
-                            player[GAMEASSISTS], player[SEASONASSISTS]/gameNumber,  player[GAMEBLOCKS], player[SEASONBLOCKS]/gameNumber,
+            print("*\t{}\t{:10}\t{}\t\tAvg: {:4.1f}\t\tReb: {}\t\tAvg: {:4.1f}\t\tAst: {}\t\tAvg: {:4.1f}\t\tBlk: {}\t\tAvg: {:4.1f}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
+                  "".format(index1, player[NAME], player[GAMESCORE], round(player[SEASONTOTAL]/gameNumber, 2), player[GAMEREBOUNDS], round(player[SEASONREBOUNDS]/gameNumber, 2),
+                            player[GAMEASSISTS], round(player[SEASONASSISTS]/gameNumber, 2),  player[GAMEBLOCKS], round(player[SEASONBLOCKS]/gameNumber, 2),
                             player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST]))
             index +=1
             index1 += 1
@@ -753,7 +753,7 @@ for year in range(1, 21):
             player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
             player[GAMEASSISTS] = int(benchAssists[index]/totalAssistsFactor*assistsTotal)
             player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across games
-            print("*\t{}\t{:10}\t{}\t\tAvg: {:4.3}\t\tReb: {}\t\tAvg: {:4.3}\t\tAst: {}\t\tAvg: {:4.3}\t\tBlk: {}\t\tAvg: {:4.3}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
+            print("*\t{}\t{:10}\t{}\t\tAvg: {:4.1f}\t\tReb: {}\t\tAvg: {:4.1f}\t\tAst: {}\t\tAvg: {:4.1f}\t\tBlk: {}\t\tAvg: {:4.1f}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
                   "".format(index1, player[NAME], player[GAMESCORE], player[SEASONTOTAL]/gameNumber, player[GAMEREBOUNDS], player[SEASONREBOUNDS]/gameNumber,
                             player[GAMEASSISTS], player[SEASONASSISTS]/gameNumber,  player[GAMEBLOCKS], player[SEASONBLOCKS]/gameNumber,
                             player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST]))
@@ -795,14 +795,25 @@ for year in range(1, 21):
         # update career statistics
         player[CAREERTOTAL] = (player[SEASONTOTAL] + player[CAREERTOTAL]*player[CAREERGAMES])/(1+player[CAREERGAMES])
         player[CAREERGAMES] += 1
-        print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}"
-              "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10))
+        # print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}"
+        #       "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10))
+
+        print("*\t{:10}\t\tAvg: {:4.1f}\t\tCareer: {:4.1f}\t\tReb: {:4.1f}\t\tCareer: {:4.1f}\t\tAst: {:4.1f}\t\tAvg: {:4.1f}\t\tBlk: {:4.1f}\t\tAvg: {:4.1f}\t{}\t\t{:10"
+              "".format(player[NAME], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10, player[SEASONREBOUNDS]/10, player[CAREERREBOUNDS]/10,
+                        player[SEASONASSISTS]/10,  player[CAREERASSISTS]/10, player[SEASONBLOCKS]/10, player[CAREERBLOCKS]/10,
+                        player[POSITION], player[YEAR]))
+
     for player in benchList:
         # update career statistics
         player[CAREERTOTAL] = (player[SEASONTOTAL] + player[CAREERTOTAL]*player[CAREERGAMES])/(1+player[CAREERGAMES])
         player[CAREERGAMES] += 1
-        print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}"
-              "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10))
+        # print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}"
+        #       "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10))
+        print("*\t{:10}\t\tAvg: {:4.1f}\t\tCareer: {:4.1f}\t\tReb: {:4.1f}\t\tCareer: {:4.1f}\t\tAst: {:4.1f}\t\tAvg: {:4.1f}\t\tBlk: {:4.1f}\t\tAvg: {:4.1f}\t{}\t\t{:10"
+              "".format(player[NAME], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10, player[SEASONREBOUNDS]/10, player[CAREERREBOUNDS]/10,
+                        player[SEASONASSISTS]/10,  player[CAREERASSISTS]/10, player[SEASONBLOCKS]/10, player[CAREERBLOCKS]/10,
+                        player[POSITION], player[YEAR]))
+
     print("*")
     print("*\tStarting Offense: \t{:5.4} \tStarting Defense: \t{:5.4}".format(teamOffense, teamDefense))
     print("*\tBench Offense: \t\t{:5.4}  \tBench Defense: \t\t{:5.4}".format(topThreeOff, topThreeDef))
@@ -1010,7 +1021,7 @@ for year in range(1, 21):
         print("*")
         print("*******************************************************")
         for player in team:
-            print("*\t{:10}\t\tAvg: {:4.3}\t\tReb Avg: {:4.3}\t\tAst Avg: {:4.3}\t\tBlk Avg: {:4.3}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
+            print("*\t{:10}\t\tAvg: {:4.1f}\t\tReb Avg: {:4.1f}\t\tAst Avg: {:4.1f}\t\tBlk Avg: {:4.1f}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
                   "".format(player[NAME], player[CAREERTOTAL]/gameNumber, player[CAREERREBOUNDS]/gameNumber,
                             player[CAREERASSISTS]/gameNumber, player[CAREERBLOCKS]/gameNumber, player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST]))
 
@@ -1085,12 +1096,21 @@ for year in range(1, 21):
     # print("Average Bench Offense {}".format(topThreeOff))
     # print("Average Bench Defense {}".format(topThreeDef))
 
+    resultList = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    updateTeamOffDefStats(team, benchList, resultList)
+    teamOffense, teamDefense, topThreeOff, topThreeDef,  = resultList[0], resultList[1], resultList[2], resultList[3]
+    assistFactor = resultList[4]
+    blockFactor = resultList[5]
+    passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, topThreeDef, blockFactor)
+
     print("*******************************************************")
     print("*")
-    print("*\tTeam Statistics")
+    print("*\tTeam Scorecard")
     print("*")
-    print("*\tTeam Offense: {:5.4}   Team Defense: {:5.4}".format(teamOffense, teamDefense))
-    print("*\tBench Offense: {:5.4}  Bench Defense: {:5.4}".format(topThreeOff, topThreeDef))
+    print("*\tStarting Offense: \t{:2} \tStarting Defense: \t{:2}".format(startingOffSummary, startingDefSummary))
+    print("*\tBench Offense: \t\t{:2}  \tBench Defense: \t\t{:2}".format(benchOffSummary, benchDefSummary))
+    print("*\tPassing Report\t\t{:2} \tBlocking Report: \t{:2}".format(passingSummary, blockSummary))
     print("*")
     print("*******************************************************")
+
     input("Type Enter to Continue: ")
