@@ -37,6 +37,8 @@ SEASONBLOCKS = 20      # integer - total number of assists collected in the curr
 CAREERBLOCKS = 21      # float - average number of assists per season over the career of the player
 SEASONEXP = 22          # Integer - amount of experienced gained during the current season
 PLAYERSTATUS = 23       # integer - 1: Starter  2: Bench Rotation (playing)  3: Benched (not playing)  4: Red Shirt (not playing)
+ASSISTEST = 24          # Estimate of Assists Factor, visible to the game player
+BLOCKEST = 25           # Estimate of Block Factor, visible to the game player
 STARTER = 0
 ROTATION = 1
 BENCHED = 2
@@ -64,12 +66,27 @@ def updateOffDeffEstimates(player, boundaryLow, boundaryHigh, limit):
             player[OFFENSEEST] += 1
         elif randomNumber > boundaryHigh:
             player[OFFENSEEST] -= 1
+
         randomNumber = random.random()
         player[DEFENSEEST] = player[DEFENSE]
         if randomNumber < boundaryLow:
             player[DEFENSEEST] += 1
         elif randomNumber > boundaryHigh:
             player[DEFENSEEST] -= 1
+
+        randomNumber = random.random()
+        player[ASSISTEST] = player[ASSISTS]
+        if randomNumber < boundaryLow:
+            player[ASSISTEST] += 1
+        elif randomNumber > boundaryHigh:
+            player[ASSISTEST] = max(0, player[ASSISTEST]-1)
+
+        randomNumber = random.random()
+        player[BLOCKEST] = player[BLOCKS]
+        if randomNumber < boundaryLow:
+            player[BLOCKEST] += 1
+        elif randomNumber > boundaryHigh:
+            player[BLOCKEST] = max(0, player[BLOCKEST]-1)
     else:
         randomNumber = random.random()
         player[OFFENSEEST] = player[OFFENSE]
@@ -77,51 +94,65 @@ def updateOffDeffEstimates(player, boundaryLow, boundaryHigh, limit):
             player[OFFENSEEST] += 1
         elif (randomNumber > boundaryHigh) and (player[OFFENSE] > 3):
             player[OFFENSEEST] -= 1
+
         randomNumber = random.random()
         player[DEFENSEEST] = player[DEFENSE]
         if (randomNumber < boundaryLow) and (player[DEFENSE] < 5):
             player[DEFENSEEST] += 1
         elif (randomNumber > boundaryHigh) and (player[DEFENSE] > 3):
             player[DEFENSEEST] -= 1
+
+        randomNumber = random.random()
+        player[ASSISTEST] = player[ASSISTS]
+        if (randomNumber < boundaryLow) and (player[ASSISTS] < 5):
+            player[ASSISTEST] += 1
+        elif (randomNumber > boundaryHigh) and (player[ASSISTS] > 3):
+            player[ASSISTEST] -= 1
+
+        randomNumber = random.random()
+        player[BLOCKEST] = player[BLOCKS]
+        if (randomNumber < boundaryLow) and (player[BLOCKS] < 5):
+            player[BLOCKEST] += 1
+        elif (randomNumber > boundaryHigh) and (player[BLOCKS] > 3):
+            player[BLOCKEST] -= 1
+
     return
 
 ########################################################
 #
 #   Initialize team lineups
 #
-#   Setup team and benchList players for the very beginning
+#   Setup team players for the very beginning
 #   of the game. The players are the actual players from the 1979
 #   MSU team.
 #
 #######################################################
-def initPlayerLists(team,benchList):
+def initPlayerLists(team):
 
     # [0 - name, 1 - position, 2 - offense, 3 - defense, 4 - year, 5 - game score, 6 - season total,
     # 7 - career total, 8 - career games, 9 - offense estimate, 10 - defense estimate]
     # 11 - game rebounds, 12 - rebound season total, 13 - career rebound total
-    team.append(["Ron", "Center", 5, 6, "Senior", 0, 0, 105, 0, 0, 0, 0, 0, 55, 0, 0, 0, 2, 2, 0, 0, 0, 0, STARTER])
-    team.append(["Rob", "Forward", 3, 3, "Sophomore", 0, 0, 15, 0, 0, 0, 0, 0, 5, 0, 0, 0,2, 0, 0, 0, 0, 0, STARTER])
-    team.append(["Jay", "Forward", 6, 6, "Junior", 0, 0, 157, 0, 0, 0, 0, 0, 65, 0, 0, 0, 2, 0, 0, 0, 0, 0, STARTER])
-    team.append(["Mike", "Guard", 4, 3, "Junior", 0, 0, 63, 0, 0, 0, 0, 0, 30, 0, 0, 0, 3, 0, 0, 0, 0, 0, STARTER])
-    team.append(["Terry", "Guard", 4, 4, "Senior", 0, 0, 55, 0, 0, 0, 0, 0, 19, 0, 0, 0, 5, 0, 0, 0, 0, 0, STARTER])
-    benchList.append(["Steve", "Center", 2, 3, "Sophomore", 0, 0, 7, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 1, 0, 0, 0, 0, ROTATION])
-    benchList.append(["Derek", "Forward", 3, 4, "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, ROTATION])
-    benchList.append(["Kurt", "Forward", 2, 4, "Junior", 0, 0, 15, 0, 0, 0, 0, 0, 10, 0, 0, 0, 2, 0, 0, 0, 0, 0, ROTATION])
-    benchList.append(["Herb", "Guard", 2, 3, "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, BENCHED])
-    benchList.append(["Kevin", "Guard", 4, 4, "Sophomore", 0, 0, 25, 0, 0, 0, 0, 0, 20, 0, 0, 0, 4, 0, 0, 0, 0, 0, ROTATION])
-    benchList.append(["Don", "Forward", 2, 3, "Sophomore", 0, 0, 7, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, BENCHED])
-    benchList.append(["Bill", "Guard", 2, 3, "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, BENCHED])
-    benchList.append(["Mike", "Guard", 3, 3, "Senior", 0, 0, 11, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 0, 0, ROTATION])
-    benchList.append(["Richard", "Forward", 2, 3, "Junior", 0, 0, 8, 0, 0, 0, 0, 0, 4, 0, 0, 0, 2, 0, 0, 0, 0, 0, BENCHED])
+    team.append(["Ron", "Center", 5, 6, "Senior", 0, 0, 105, 0, 0, 0, 0, 0, 55, 0, 0, 0, 2, 2, 0, 0, 0, 0, STARTER, 0, 0])
+    team.append(["Rob", "Forward", 3, 3, "Sophomore", 0, 0, 15, 0, 0, 0, 0, 0, 5, 0, 0, 0,2, 0, 0, 0, 0, 0, STARTER, 0, 0])
+    team.append(["Jay", "Forward", 6, 6, "Junior", 0, 0, 157, 0, 0, 0, 0, 0, 65, 0, 0, 0, 2, 0, 0, 0, 0, 0, STARTER, 0, 0])
+    team.append(["Mike", "Guard", 4, 3, "Junior", 0, 0, 63, 0, 0, 0, 0, 0, 30, 0, 0, 0, 3, 0, 0, 0, 0, 0, STARTER, 0, 0])
+    team.append(["Terry", "Guard", 4, 4, "Senior", 0, 0, 55, 0, 0, 0, 0, 0, 19, 0, 0, 0, 5, 0, 0, 0, 0, 0, STARTER, 0, 0])
+    team.append(["Steve", "Center", 2, 3, "Sophomore", 0, 0, 7, 0, 0, 0, 0, 0, 5, 0, 0, 0, 2, 1, 0, 0, 0, 0, ROTATION, 0, 0])
+    team.append(["Derek", "Forward", 3, 4, "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 0, 0, ROTATION, 0, 0])
+    team.append(["Kurt", "Forward", 2, 4, "Junior", 0, 0, 15, 0, 0, 0, 0, 0, 10, 0, 0, 0, 2, 0, 0, 0, 0, 0, ROTATION, 0, 0])
+    team.append(["Herb", "Guard", 2, 3, "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 0, BENCHED, 0, 0])
+    team.append(["Kevin", "Guard", 4, 4, "Sophomore", 0, 0, 25, 0, 0, 0, 0, 0, 20, 0, 0, 0, 4, 0, 0, 0, 0, 0, ROTATION, 0, 0])
+    team.append(["Don", "Forward", 2, 3, "Sophomore", 0, 0, 7, 0, 0, 0, 0, 0, 3, 0, 0, 0, 2, 0, 0, 0, 0, 0, BENCHED, 0, 0])
+    team.append(["Bill", "Guard", 2, 3, "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 3, 0, 0, 0, 0, 0, BENCHED, 0, 0])
+    team.append(["Mike", "Guard", 3, 3, "Senior", 0, 0, 11, 0, 0, 0, 0, 0, 1, 0, 0, 0, 3, 0, 0, 0, 0, 0, ROTATION, 0, 0])
+    team.append(["Richard", "Forward", 2, 3, "Junior", 0, 0, 8, 0, 0, 0, 0, 0, 4, 0, 0, 0, 2, 0, 0, 0, 0, 0, BENCHED, 0, 0])
 
     # determine offense and defense score factor estimates
     # only the estimates will be viewed during recruiting
     for player in team:
         updateOffDeffEstimates(player, 0.1, 0.9, False)
-    for player in benchList:
-        updateOffDeffEstimates(player, 0.1, 0.9, False)
 
-    return;
+    return
 
 
 ########################################################
@@ -132,7 +163,7 @@ def initPlayerLists(team,benchList):
 #   Input the new offensive factor to use.
 #
 #######################################################
-def updateOffenseEstimate(team, benchList):
+def updateOffenseEstimate(team):
     # give option to update offensive scoring factor estimates
     Done = False
     while not Done:
@@ -142,15 +173,12 @@ def updateOffenseEstimate(team, benchList):
             response = int(response)
             if response == 0:
                 Done = True
-            elif response < 6:
+            else:
                 response1 = int(input("*  Enter new offensive estimate for {} ".format(team[response-1][NAME])))
                 team[response-1][OFFENSEEST] = response1
-            elif response > 5:
-                response1 = int(input("*  Enter new offensive estimate for {} ".format(benchList[response-6][NAME])))
-                benchList[response-6][OFFENSEEST] = response1
-    return;
+    return
 
-def updateDefenseEstimate(team, benchList):
+def updateDefenseEstimate(team):
     # give option to update offensive scoring factor estimates
     Done = False
     while not Done:
@@ -160,13 +188,11 @@ def updateDefenseEstimate(team, benchList):
             response = int(response)
             if response == 0:
                 Done = True
-            elif response < 6:
+            else:
                 response1 = int(input("*  Enter new defensive estimate for {} ".format(team[response-1][NAME])))
                 team[response-1][DEFENSEEST] = response1
-            elif response > 5:
-                response1 = int(input("*  Enter new defensive estimate for {} ".format(benchList[response-6][NAME])))
-                benchList[response-6][DEFENSEEST] = response1
-    return;
+
+    return
 
 ########################################################
 #
@@ -177,7 +203,7 @@ def updateDefenseEstimate(team, benchList):
 #   and the second number is from the bench line up.
 #
 #######################################################
-def updateStartingLineup(team, benchList):
+def updateStartingLineup(team):
     # give option to swap player from starting to bench lineup
     Done = False
     while not Done:
@@ -191,12 +217,12 @@ def updateStartingLineup(team, benchList):
                 response1,response2 = input("* Input Number of starting player and number of bench player to swap ").split()
                 if (response1.isdigit() and response2.isdigit()):
                     response1,response2 = int(response1), int(response2)
+                    team[response1-1][PLAYERSTATUS] =  ROTATION
+                    team[response2-1][PLAYERSTATUS] = STARTER
                     tempPlayer = list(team[response1-1])
-                    team[response1-1] = benchList[response2-6]
-                    team[response1-1][PLAYERSTATUS] = STARTER
-                    benchList[response2-6] = tempPlayer
-                    benchList[response2-6][PLAYERSTATUS] = ROTATION
-    return;
+                    team[response1-1] = team[response2]
+                    team[response2-1] = tempPlayer
+    return
 
 ########################################################
 #
@@ -207,8 +233,11 @@ def updateStartingLineup(team, benchList):
 #######################################################
 def convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, topThreeDef, blockFactor):
 
-    passingSummary = "D"
-    if assistFactor <= 3:
+    if assistFactor <= 1:
+        passingSummary = "E"
+    elif assistFactor <= 2:
+        passingSummary = "D"
+    elif assistFactor <= 3:
         passingSummary = "C"
     elif assistFactor <= 5:
         passingSummary = "B"
@@ -217,8 +246,11 @@ def convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, 
     else:
         passingSummary = "A"
 
-    blockSummary = "D"
-    if blockFactor <= 3:
+    if teamDefense <= 2.5:
+        blockSummary = "E"
+    elif blockFactor <= 3:
+        blockSummary = "D"
+    elif blockFactor <= 3.5:
         blockSummary = "C"
     elif blockFactor <= 5:
         blockSummary = "B"
@@ -227,8 +259,11 @@ def convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, 
     else:
         blockSummary = "A"
 
-    startingOffSummary = "D"
-    if teamOffense <= 4:
+    if teamOffense <= 3.0:
+        startingOffSummary = "E"
+    elif teamOffense <= 3.5:
+        startingOffSummary = "D"
+    elif teamOffense <= 4:
         startingOffSummary = "C"
     elif teamOffense <= 4.5:
         startingOffSummary = "B"
@@ -237,8 +272,11 @@ def convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, 
     else:
         startingOffSummary = "A"
 
-    startingDefSummary = "D"
-    if teamDefense <= 4:
+    if teamDefense <= 3.0:
+        startingDefSummary = "E"
+    elif teamDefense <= 3.5:
+        startingDefSummary = "D"
+    elif teamDefense <= 4.0:
         startingDefSummary = "C"
     elif teamDefense <= 4.5:
         startingDefSummary = "B"
@@ -247,25 +285,36 @@ def convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, 
     else:
         startingDefSummary = "A"
 
-    benchOffSummary = "D"
-    if topThreeOff <= 4:
+    if topThreeOff <= 3.0:
+        benchOffSummary = "E"
+    elif topThreeOff <= 3.5:
+        benchOffSummary = "D"
+    elif topThreeOff <= 4:
         benchOffSummary = "C"
     elif topThreeOff <= 4.5:
         benchOffSummary = "B"
     elif topThreeOff <= 5:
         benchOffSummary = "A-"
-    else:
+    elif topThreeOff <= 5.5:
         benchOffSummary = "A"
+    else:
+        benchOffSummary = "A+"
 
-    benchDefSummary = "D"
-    if topThreeDef <= 4:
+    if topThreeDef <= 3.0:
+        benchDefSummary = "E"
+    elif topThreeDef <= 3.5:
+        benchDefSummary = "D"
+    elif topThreeDef <= 4:
         benchDefSummary = "C"
     elif topThreeDef <= 4.5:
         benchDefSummary = "B"
     elif topThreeDef <= 5:
         benchDefSummary = "A-"
-    else:
+    elif topThreeDef <= 5.5:
         benchDefSummary = "A"
+    else:
+        benchDefSummary = "A+"
+
     return(passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary)
 
 
@@ -280,7 +329,7 @@ def convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, 
 #   three bench players for offense and defense respectively
 #
 #######################################################
-def updateTeamOffDefStats(team, benchList, resultList):
+def updateTeamOffDefStats(team, resultList):
     #   resultList[0] = teamOffense
     #   resultList[1] = teamDefense
     #   resultList[2] = topThreeOff
@@ -290,52 +339,24 @@ def updateTeamOffDefStats(team, benchList, resultList):
 
     teamOffense = 0     # average offensive factor of the starters
     teamDefense = 0     # average defensive factor of the starters
+    benchOffense = 0     # average offensive factor of the starters
+    benchDefense = 0     # average defensive factor of the starters
     teamAssistMax = 0      # max assist factor of the starters
     teamAssist = 0      # average assist factor of the starters
     teamBlocks = 0
     rotationCount = 0
     for player in team:
-        if (player[PLAYERSTATUS] == STARTER) or True:       #JGD
+        if (player[PLAYERSTATUS] == STARTER):
             teamOffense += player[OFFENSE]/5
             teamDefense += player[DEFENSE]/5
             teamAssistMax = max(teamAssistMax, player[ASSISTS])
             teamAssist += player[ASSISTS]/5
-    #     elif (player[PLAYERSTATUS] == ROTATION) or False:   #JGD
-    #         benchOffense += player[OFFENSE]
-    #         benchDefense += player[DEFENSE]
-    #         rotationCount += 1
-    # benchOffense = benchOffense / rotationCount
-    # benchDefense = benchDefense / rotationCount
-
-    # determine how many players are at each scoring factor level
-    # for example, 3 players at level 4, ...
-    # these two list keep count of the number at each level
-    benchOffense = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    benchDefense = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    for player in benchList:
-        benchOffense[player[OFFENSE]] += 1
-        benchDefense[player[DEFENSE]] += 1
-
-    topThreeOffIncr = 0
-    topThreeDefIncr = 0
-    topThreeOff = 0     # average offensive factor of the top 3 bench players
-    topThreeDef = 0     # average defensive factor of the top 3 bench players
-    for index in range(9,-1,-1):
-        # print("Index {}".format(index))
-        if benchOffense[index] != 0:
-            while (topThreeOffIncr < 3) and (benchOffense[index] > 0):
-                # print("OFF While Loop topThreeOffIncr {}  benchOffense index {}".format(topThreeOffIncr, benchOffense[index]))
-                topThreeOffIncr += 1
-                benchOffense[index] -= 1
-                topThreeOff += index
-        if benchDefense[index] != 0:
-            while (topThreeDefIncr < 3) and (benchDefense[index] > 0):
-                # print("DEF While Loop topThreeOffIncr {}  benchOffense index {}".format(topThreeOffIncr, benchOffense[index]))
-                topThreeDefIncr += 1
-                benchDefense[index] -= 1
-                topThreeDef += index
-    topThreeOff /= 3
-    topThreeDef /=3
+        elif (player[PLAYERSTATUS] == ROTATION):
+            benchOffense += player[OFFENSE]
+            benchDefense += player[DEFENSE]
+            rotationCount += 1
+    benchOffense = benchOffense / rotationCount
+    benchDefense = benchDefense / rotationCount
 
     assistFactor = (2*teamAssistMax + teamAssist)/3
 
@@ -351,18 +372,18 @@ def updateTeamOffDefStats(team, benchList, resultList):
 
     teamBlocks = 0
     for player in team:
-        if (player[PLAYERSTATUS] == STARTER) or True:       #JGD
+        if (player[PLAYERSTATUS] == STARTER):
             teamBlocks += player[BLOCKS]
 
     resultList[0] = teamOffense
     resultList[1] = teamDefense
-    #      resultList[2] = benchOffense         JGD
-    #       resultList[3] = benchDefense       JGD
-    resultList[2] = topThreeOff
-    resultList[3] = topThreeDef
+    resultList[2] = benchOffense
+    resultList[3] = benchDefense
+    resultList[2] = benchOffense
+    resultList[3] = benchDefense
     resultList[5] = teamBlocks
 
-    return;
+    return
 
 ##################################################
 # Determine Opponent offense / defense factor and their record
@@ -416,14 +437,85 @@ class opponentInfo:
     def Wins(self):
         return(self.wins)
 
+def convertStatus(statusNumber):
+    if statusNumber == 0:
+        return ("Starter")
+    elif statusNumber == 1:
+        return("Rotation")
+    elif statusNumber == 2:
+        return("Benched")
+    elif statusNumber == 3:
+        return("Red Shirt")
+    else:
+        return("ERROR")
 
-def displayMenu(team, benchList, gameNumber):
+def conODA(number):
+    grade = ["E", "D", "C", "B", "B+","A-", "A", "A+", "A++", "A+++"]
+    return(grade[number-1])
+
+def conBlock(number):
+    grade = ["D", "C", "B", "B+","A-", "A", "A+", "A++", "A+++"]
+    return(grade[number])
+
+def bubbleSortTeam(team):
+    done = False
+    while not done:
+        swappedPlayers = False
+        for index in range (1,len(team)):
+            if team[index][PLAYERSTATUS] < team[index-1][PLAYERSTATUS]:
+                tempPlayer = team[index-1]
+                team[index-1] = team[index]
+                team[index] = tempPlayer
+                swappedPlayers = True
+            elif (team[index][PLAYERSTATUS] == team[index-1][PLAYERSTATUS]) and (team[index][POSITION] == "Center" and ((team[index-1][POSITION] == "Forward") or ((team[index-1][POSITION] == "Guard")))):
+                tempPlayer = team[index-1]
+                team[index-1] = team[index]
+                team[index] = tempPlayer
+                swappedPlayers = True
+            elif (team[index][PLAYERSTATUS] == team[index-1][PLAYERSTATUS]) and (team[index][POSITION] == "Forward" and (team[index-1][POSITION] == "Guard")):
+                tempPlayer = team[index-1]
+                team[index-1] = team[index]
+                team[index] = tempPlayer
+                swappedPlayers = True
+        if not swappedPlayers:
+            done = True
+
+
+def sortTeamOrder(team):
+    done = False
+    while not done:
+        # find last player with status rotation
+        index = 0
+        rotationIndex = 0
+        for player in team:
+            if (player[PLAYERSTATUS] == ROTATION):
+                rotationIndex = index
+            index += 1
+        # find first player with status Benched
+        index = 0
+        benchedIndex = 0
+        found = False
+        for player in team:
+            if (player[PLAYERSTATUS] == BENCHED) and (not found):
+                benchedIndex = index
+                found = True
+            index += 1
+        if (benchedIndex < rotationIndex):
+            tempPlayer = team[rotationIndex]
+            team[rotationIndex] = team[benchedIndex]
+            team[benchedIndex] = tempPlayer
+        else:
+            done = True
+    return()
+
+
+def displayMenu(team, gameNumber):
     print("*******************************************************")
     print("*")
     print("* Select Option")
     print("*\t\t0 or Enter:\t\tContinue")
-    print("*\t\t1:\t\t\t\tUpdate starting lineup")
-    print("*\t\t2:\t\t\t\tList player statistics")
+    print("*\t\t1:\t\t\t\tChange playing status of a player")
+    print("*\t\t2:\t\t\t\tList Roster with Statistics")
     print("*\t\t3:\t\t\t\tUpdate player offense factor")
     print("*\t\t4:\t\t\t\tUpdate player defense factor")
     print("*")
@@ -438,32 +530,50 @@ def displayMenu(team, benchList, gameNumber):
             response = int(response)
             if response == 0:
                 Done = True
-            elif response ==1:
-                response1,response2 = input("* Input Number of starting player and number of bench player to swap ").split()
-                if (response1.isdigit() and response2.isdigit()):
-                    response1,response2 = int(response1), int(response2)
-                    tempPlayer = list(team[response1-1])
-                    team[response1-1] = benchList[response2-6]
-                    benchList[response2-6] = tempPlayer
+            # elif response ==1:
+            #     response1,response2 = input("* Input Number of starting player and number of bench player to swap ").split()
+            #     if (response1.isdigit() and response2.isdigit()):
+            #         response1,response2 = int(response1), int(response2)
+            #         tempPlayer = list(team[response1-1])
+            #         team[response1-1] = team[response2-1]
+            #         team[response2-1] = tempPlayer
+            # elif response == 2:
+            #     index1 = 1
+            #     for player in team:
+            #         print("*\t{}\t{:10}\t\tAvg: {:4.3}\t\tReb Avg: {:4.3}\t\tAst: Avg: {:4.3}\t\tBlk Avg: {:4.3}\t{}\t\t{:10}\tOff: {:2}\t\t Def: {:2}\tAsst: {:2}\t\tBlk: {:2}\t\tExp: {}\tStatus: {}"
+            #               "".format(index1, player[NAME], player[SEASONTOTAL]/gameNumber, player[SEASONREBOUNDS]/gameNumber,
+            #                         player[SEASONASSISTS]/gameNumber, player[SEASONBLOCKS]/gameNumber, player[POSITION],
+            #                         player[YEAR], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]),
+            #                         conODA(player[ASSISTEST]), conBlock(player[BLOCKEST]),
+            #                         player[SEASONEXP], convertStatus(player[PLAYERSTATUS])))
+            #         index1 += 1
+            elif response == 1:
+                response = input("* Input Number of player and new status (0 - Starter, 1 - Rotation, 2 - Benched, 3 - Red Shirt ")
+                if len(response) >= 3:
+                    response1, response2 = response.split()
+                    if response1.isdigit():
+                        response1 = int(response1)
+                        if response2 in ["0", "1", "2", "3"]:
+                            response2 = int(response2)
+                            team[response1-1][PLAYERSTATUS] = response2
             elif response == 2:
+                bubbleSortTeam(team)
                 index1 = 1
                 for player in team:
-                    print("*\t{}\t{:10}\t\tAvg: {:4.3}\t\tReb Avg: {:4.3}\t\tAst: Avg: {:4.3}\t\tBlk Avg: {:4.3}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
+                    print("*\t{}\t{:10}\t\tAvg: {:4.1f}\t\tReb Avg: {:4.1f}\t\tAst: Avg: {:4.1f}\t\tBlk Avg: {:4.1f}\t{}\t\t{:10}\tOff: {:2}\t\t Def: {:2}\tAsst: {:2}\t\tBlk: {:2}\t\tExp: {}\tStatus: {}"
                           "".format(index1, player[NAME], player[SEASONTOTAL]/gameNumber, player[SEASONREBOUNDS]/gameNumber,
-                                    player[SEASONASSISTS]/gameNumber, player[SEASONBLOCKS]/gameNumber, player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST]))
-                    index1 += 1
-                for player in benchList:
-                    print("*\t{}\t{:10}\t\tAvg: {:4.3}\t\tReb Avg: {:4.3}\t\tAst: Avg: {:4.3}\t\tBlk Avg: {:4.3}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
-                          "".format(index1, player[NAME], player[SEASONTOTAL]/gameNumber, player[SEASONREBOUNDS]/gameNumber,
-                                    player[SEASONASSISTS]/gameNumber, player[SEASONBLOCKS]/gameNumber, player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST]))
+                                    player[SEASONASSISTS]/gameNumber, player[SEASONBLOCKS]/gameNumber, player[POSITION],
+                                    player[YEAR], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]),
+                                    conODA(player[ASSISTEST]), conBlock(player[BLOCKEST]),
+                                    player[SEASONEXP], convertStatus(player[PLAYERSTATUS])))
                     index1 += 1
             elif response == 3:
-                updateOffenseEstimate(team, benchList)
+                updateOffenseEstimate(team)
             elif response == 4:
-                updateDefenseEstimate(team, benchList)
+                updateDefenseEstimate(team)
         else:
             Done = True
-    return;
+    return
 
 
 ########################################################
@@ -476,8 +586,7 @@ def displayMenu(team, benchList, gameNumber):
 #
 #######################################################
 team = []   # List of the starting players for the MSU team
-benchList = []  # List of the bench players for the MSU team
-initPlayerLists(team, benchList)    # add the original players to the team
+initPlayerLists(team)    # add the original players to the team
 
 print("*******************************************************")
 print("*")
@@ -490,33 +599,40 @@ print("*******************************************************")
 
 print("*******************************************************")
 print("*")
-print("*\tStarting Lineup")
+print("*\tPlayer Lineup")
 print("*")
 print("*******************************************************")
 for player in team:
-    print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}\tReb Ave: {:4.3}\tAst Avg: {:4.3}\tBlk Avg: {:4.3}"
-          "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10,
-                    player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10, player[CAREERASSISTS]/10, player[CAREERBLOCKS]/10))
-
-print("*******************************************************")
-print("*")
-print("*\tBench Players")
-print("*")
-print("*******************************************************")
-for player in benchList:
-    print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}\tReb Ave: {:4.3}\tAst Avg: {:4.3}\tBlk Avg: {:4.3}"
-          "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10,
-                    player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10, player[CAREERASSISTS]/10, player[CAREERBLOCKS]/10))
+    if player[PLAYERSTATUS] == STARTER:
+        print("*\tName: {:10}  \tPosition: {}  \tOffense: {:2}  \tDefense: {:2} \tYear: {}\tAve: {:4.1f}\tCareer: {:4.1f}\tReb Ave: {:4.1f}\tAst Avg: {:4.1f}\tBlk Avg: {:4.1f}\t{}"
+              "".format(player[NAME], player[POSITION], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]),
+                        player[YEAR], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10,
+                        player[CAREERASSISTS]/10, player[CAREERBLOCKS]/10, "Starter"))
+for player in team:
+    if player[PLAYERSTATUS] == ROTATION:
+        print("*\tName: {:10}  \tPosition: {}  \tOffense: {:2}  \tDefense: {:2} \tYear: {}\tAve: {:4.1f}\tCareer: {:4.1f}\tReb Ave: {:4.1f}\tAst Avg: {:4.1f}\tBlk Avg: {:4.1f}\t{}"
+              "".format(player[NAME], player[POSITION], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]), player[YEAR], player[SEASONTOTAL]/10,
+                        player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10, player[CAREERASSISTS]/10, player[CAREERBLOCKS]/10, "Bench Rotation"))
+for player in team:
+    if player[PLAYERSTATUS] == BENCHED:
+        print("*\tName: {:10}  \tPosition: {}  \tOffense: {:2}  \tDefense: {:2} \tYear: {}\tAve: {:4.1f}\tCareer: {:4.1f}\tReb Ave: {:4.1f}\tAst Avg: {:4.1f}\tBlk Avg: {:4.1f}\t{}"
+              "".format(player[NAME], player[POSITION], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]), player[YEAR], player[SEASONTOTAL]/10,
+                        player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10, player[CAREERASSISTS]/10, player[CAREERBLOCKS]/10, "Benched"))
+for player in team:
+    if player[PLAYERSTATUS] == REDSHIRT:
+        print("*\tName: {:10}  \tPosition: {}  \tOffense: {:2}  \tDefense: {:2} \tYear: {}\tAve: {:4.1f}\tCareer: {:4.1f}\tReb Ave: {:4.1f}\tAst Avg: {:4.1f}\tBlk Avg: {:4.1f}\t{}"
+              "".format(player[NAME], player[POSITION], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]), player[YEAR], player[SEASONTOTAL]/10,
+                        player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10, player[CAREERASSISTS]/10, player[CAREERBLOCKS]/10, "Red Shirt"))
 
 # since lineup may have changed, need to update team stats
 resultList = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-updateTeamOffDefStats(team, benchList, resultList)
-teamOffense, teamDefense, topThreeOff, topThreeDef  = resultList[0], resultList[1], resultList[2], resultList[3]
+updateTeamOffDefStats(team, resultList)
+teamOffense, teamDefense, benchOffense, benchDefense  = resultList[0], resultList[1], resultList[2], resultList[3]
 assistFactor = resultList[4]
 blockFactor = resultList[5]
 
 
-passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, topThreeDef, blockFactor)
+passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, benchOffense, benchDefense, blockFactor)
 
 print("*******************************************************")
 print("*")
@@ -556,26 +672,26 @@ for year in range(1, 21):
         # teamOffense, topThreeOff, and homeOffense are all score factor scores (value 3..9) that represent
         # the average for the team starters or top three bench players.
         ##################################################
-        homeOffense = (teamOffense*2 + topThreeOff)/3 + random.random()*3 - 1.5
-        homeDefense = (teamDefense*2 + topThreeDef)/3 + random.random()*3 - 1.5
-        teamScore = int((homeOffense - opponent.Defense())*10 + 60)  + int(assistFactor)
-        opponentScore = int((opponent.Offense() - homeDefense)*10 + 65)
+        homeOffense = (teamOffense*2 + benchOffense)/3 + random.random()*3 - 1.5
+        homeDefense = (teamDefense*2 + benchDefense)/3 + random.random()*3 - 1.5
+        teamScore = int((homeOffense - opponent.Defense())*10 + 60)  + min(int(assistFactor),8)
+        opponentScore = int((opponent.Offense() - homeDefense)*10 + 65) - min(int(blockFactor)*2,8)
         if teamScore - opponentScore >= 0:
             print("*  Swami Predicts: MSU by {}".format(teamScore - opponentScore))
         else:
             print("*  Swami Predicts: {} by {}".format(opponentList[gameNumber-1], opponentScore - teamScore))
 
         # give option to change starting lineup
-        # updateStartingLineup(team, benchList)
-        displayMenu(team, benchList, gameNumber-1)
+        # updateStartingLineup(team)
+        displayMenu(team, gameNumber-1)
         # since lineup may have changed, need to update team stats
         resultList = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        updateTeamOffDefStats(team, benchList, resultList)
-        teamOffense, teamDefense, topThreeOff, topThreeDef,  = resultList[0], resultList[1], resultList[2], resultList[3]
+        updateTeamOffDefStats(team, resultList)
+        teamOffense, teamDefense, benchOffense, benchDefense,  = resultList[0], resultList[1], resultList[2], resultList[3]
         assistFactor = resultList[4]
         blockFactor = resultList[5]
 
-        passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, topThreeDef, blockFactor)
+        passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, benchOffense, benchDefense, blockFactor)
 
         print("*******************************************************")
         print("*")
@@ -594,12 +710,12 @@ for year in range(1, 21):
         # teamOffense, topThreeOff, and homeOffense are all score factor scores (value 3..9) that represent
         # the average for the team starters or top three bench players.
         ##################################################
-        homeOffense = (teamOffense*2 + topThreeOff)/3 + random.random()*2 - 1
-        homeDefense = (teamDefense*2 + topThreeDef)/3 + random.random()*2 - 1
+        homeOffense = (teamOffense*2 + benchOffense)/3 + random.random()*2 - 1
+        homeDefense = (teamDefense*2 + benchDefense)/3 + random.random()*2 - 1
 
         # determine points scored for this game
-        teamScore = int((homeOffense - opponent.Defense())*10 + 60) + int(assistFactor)
-        opponentScore = int((opponent.Offense() - homeDefense)*10 + 65) - int(blockFactor)*2
+        teamScore = int((homeOffense - opponent.Defense())*10 + 60) + min(int(assistFactor),8)
+        opponentScore = int((opponent.Offense() - homeDefense)*10 + 65) - min(int(blockFactor)*2,8)
         teamRebounds = int(teamScore/2)
         # adjust score if it is a tied score
         if teamScore == opponentScore:
@@ -625,25 +741,26 @@ for year in range(1, 21):
         startingScore = []  # list containing the scoring factor for this game for the starting players
         benchScore = []     # list containing the scoring factor for this game for the bench players
         for player in team:
-            if player[OFFENSE] > 7:
-                startingScore.append(9*(player[OFFENSE] + 3*random.random()))
-            elif player[OFFENSE] > 6:
-                startingScore.append(7*(player[OFFENSE] + 3*random.random()))
-            elif player[OFFENSE] > 5:
-                startingScore.append(5*(player[OFFENSE] + 3*random.random()))
-            elif player[OFFENSE] > 4:
-                startingScore.append(3*(player[OFFENSE] + 3*random.random()))
-            else:
-                startingScore.append(2*(player[OFFENSE] + 3*random.random()))
-        for player in benchList:
-            if player[OFFENSE] > 4:
-                benchScore.append((2*player[OFFENSE] + 4*random.random()))
-            elif player[OFFENSE] > 3:
-                benchScore.append(0.5*(player[OFFENSE] + 2*random.random()))
-            elif (random.random() > 0.5):
-                benchScore.append(0.5*(player[OFFENSE] + 2*random.random()))
-            else:
-                benchScore.append(0)
+            if (player[PLAYERSTATUS] == STARTER):
+                if player[OFFENSE] > 7:
+                    startingScore.append(9*(player[OFFENSE] + 3*random.random()))
+                elif player[OFFENSE] > 6:
+                    startingScore.append(7*(player[OFFENSE] + 3*random.random()))
+                elif player[OFFENSE] > 5:
+                    startingScore.append(5*(player[OFFENSE] + 3*random.random()))
+                elif player[OFFENSE] > 4:
+                    startingScore.append(3*(player[OFFENSE] + 3*random.random()))
+                else:
+                    startingScore.append(2*(player[OFFENSE] + 3*random.random()))
+            elif (player[PLAYERSTATUS]) == ROTATION:
+                if player[OFFENSE] > 4:
+                    benchScore.append((2*player[OFFENSE] + 4*random.random()))
+                elif player[OFFENSE] > 3:
+                    benchScore.append(0.5*(player[OFFENSE] + 2*random.random()))
+                elif (random.random() > 0.5):
+                    benchScore.append(0.5*(player[OFFENSE] + 2*random.random()))
+                else:
+                    benchScore.append(0)
 
         # determine total scoreing factor for the entire team for this game
         totalScoreFactor = 0
@@ -658,25 +775,26 @@ for year in range(1, 21):
         startingRebounds = []  # list containing the rebound factor for this game for the starting players
         benchRebounds = []     # list containing the rebound factor for this game for the bench players
         for player in team:
-            if player[DEFENSE] > 7:
-                startingRebounds.append(9*(player[DEFENSE] + 3*random.random()))
-            elif player[DEFENSE] > 6:
-                startingRebounds.append(7*(player[DEFENSE] + 3*random.random()))
-            elif player[OFFENSE] > 5:
-                startingRebounds.append(5*(player[DEFENSE] + 3*random.random()))
-            elif player[OFFENSE] > 4:
-                startingRebounds.append(3*(player[DEFENSE] + 3*random.random()))
-            else:
-                startingRebounds.append(2*(player[DEFENSE] + 3*random.random()))
-        for player in benchList:
-            if player[DEFENSE] > 4:
-                benchRebounds.append((2*player[DEFENSE] + 4*random.random()))
-            elif player[DEFENSE] > 3:
-                benchRebounds.append(0.5*(player[DEFENSE] + 2*random.random()))
-            elif (random.random() > 0.5):
-                benchRebounds.append(0.5*(player[DEFENSE] + 2*random.random()))
-            else:
-                benchRebounds.append(0)
+            if (player[PLAYERSTATUS] == STARTER):
+                if player[DEFENSE] > 7:
+                    startingRebounds.append(9*(player[DEFENSE] + 3*random.random()))
+                elif player[DEFENSE] > 6:
+                    startingRebounds.append(7*(player[DEFENSE] + 3*random.random()))
+                elif player[DEFENSE] > 5:
+                    startingRebounds.append(5*(player[DEFENSE] + 3*random.random()))
+                elif player[DEFENSE] > 4:
+                    startingRebounds.append(3*(player[DEFENSE] + 3*random.random()))
+                else:
+                    startingRebounds.append(2*(player[DEFENSE] + 3*random.random()))
+            elif (player[PLAYERSTATUS]) == ROTATION:
+                if player[DEFENSE] > 4:
+                    benchRebounds.append((3*player[DEFENSE] + 4*random.random()))
+                elif player[DEFENSE] > 3:
+                    benchRebounds.append((1.5*player[DEFENSE] + 2*random.random()))
+                elif (random.random() > 0.5):
+                    benchRebounds.append((player[DEFENSE] + 2*random.random()))
+                else:
+                    benchRebounds.append(0)
 
         # determine total rebound factor for the entire team for this game
         totalReboundsFactor = 0
@@ -693,25 +811,26 @@ for year in range(1, 21):
         startingAssists = []  # list containing the rebound factor for this game for the starting players
         benchAssists = []     # list containing the rebound factor for this game for the bench players
         for player in team:
-            if player[ASSISTS] > 7:
-                startingAssists.append(9*(player[ASSISTS] + 3*random.random()))
-            elif player[ASSISTS] > 6:
-                startingAssists.append(7*(player[ASSISTS] + 3*random.random()))
-            elif player[ASSISTS] > 5:
-                startingAssists.append(5*(player[ASSISTS] + 3*random.random()))
-            elif player[ASSISTS] > 4:
-                startingAssists.append(3*(player[ASSISTS] + 3*random.random()))
-            else:
-                startingAssists.append(2*(player[ASSISTS] + 3*random.random()))
-        for player in benchList:
-            if player[ASSISTS] > 4:
-                benchAssists.append((2*player[ASSISTS] + 4*random.random()))
-            elif player[ASSISTS] > 3:
-                benchAssists.append(0.5*(player[ASSISTS] + 2*random.random()))
-            elif (random.random() > 0.5):
-                benchAssists.append(0.5*(player[ASSISTS] + 2*random.random()))
-            else:
-                benchAssists.append(0)
+            if (player[PLAYERSTATUS] == STARTER):
+                if player[ASSISTS] > 7:
+                    startingAssists.append(9*(player[ASSISTS] + 3*random.random()))
+                elif player[ASSISTS] > 6:
+                    startingAssists.append(7*(player[ASSISTS] + 3*random.random()))
+                elif player[ASSISTS] > 5:
+                    startingAssists.append(5*(player[ASSISTS] + 3*random.random()))
+                elif player[ASSISTS] > 4:
+                    startingAssists.append(3*(player[ASSISTS] + 3*random.random()))
+                else:
+                    startingAssists.append(2*(player[ASSISTS] + 3*random.random()))
+            elif (player[PLAYERSTATUS]) == ROTATION:
+                if player[ASSISTS] > 4:
+                    benchAssists.append((2*player[ASSISTS] + 4*random.random()))
+                elif player[ASSISTS] > 3:
+                    benchAssists.append(0.5*(player[ASSISTS] + 2*random.random()))
+                elif (random.random() > 0.5):
+                    benchAssists.append(0.5*(player[ASSISTS] + 2*random.random()))
+                else:
+                    benchAssists.append(0)
 
         # determine total assist factor for the entire team for this game
         totalAssistsFactor = 0
@@ -728,16 +847,17 @@ for year in range(1, 21):
         blocksTotal = 3 + blockFactor
         startingBlocks = []  # list containing the rebound factor for this game for the starting players
         for player in team:
-            if player[BLOCKS] > 7:
-                startingBlocks.append(9*(player[BLOCKS] + 3*random.random()))
-            elif player[BLOCKS] > 6:
-                startingBlocks.append(7*(player[BLOCKS] + 3*random.random()))
-            elif player[BLOCKS] > 5:
-                startingBlocks.append(5*(player[BLOCKS] + 3*random.random()))
-            elif player[BLOCKS] > 4:
-                startingBlocks.append(3*(player[BLOCKS] + 3*random.random()))
-            else:
-                startingBlocks.append(2*(player[BLOCKS] + 3*random.random()))
+            if (player[PLAYERSTATUS] == STARTER):
+                if player[BLOCKS] > 7:
+                    startingBlocks.append(9*(player[BLOCKS] + 3*random.random()))
+                elif player[BLOCKS] > 6:
+                    startingBlocks.append(7*(player[BLOCKS] + 3*random.random()))
+                elif player[BLOCKS] > 5:
+                    startingBlocks.append(5*(player[BLOCKS] + 3*random.random()))
+                elif player[BLOCKS] > 4:
+                    startingBlocks.append(3*(player[BLOCKS] + 3*random.random()))
+                else:
+                    startingBlocks.append(2*(player[BLOCKS] + 3*random.random()))
 
         # determine total block factor for the entire team for this game
         totalBlockFactor = 0
@@ -752,27 +872,35 @@ for year in range(1, 21):
         #   across the individual players
         index = 0
         for player in team:
-            player[GAMESCORE] = int(startingScore[index]/totalScoreFactor*teamScore)
-            player[SEASONTOTAL] += player[GAMESCORE]  # accumlate scores across games
-            player[GAMEREBOUNDS] = int(startingRebounds[index]/totalReboundsFactor*teamRebounds)
-            player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
-            player[GAMEASSISTS] = int(startingAssists[index]/totalAssistsFactor*assistsTotal)
-            player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across games
-            player[GAMEBLOCKS] = int(startingBlocks[index]/totalBlockFactor*blocksTotal)
-            player[SEASONBLOCKS] += player[GAMEBLOCKS]  # accumlate scores across games
-            index +=1
+            if player[PLAYERSTATUS] == STARTER:
+                player[GAMESCORE] = int(startingScore[index]/totalScoreFactor*teamScore)
+                player[SEASONTOTAL] += player[GAMESCORE]  # accumlate scores across games
+                player[GAMEREBOUNDS] = int(startingRebounds[index]/totalReboundsFactor*teamRebounds)
+                player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
+                player[GAMEASSISTS] = int(startingAssists[index]/totalAssistsFactor*assistsTotal)
+                player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across games
+                player[GAMEBLOCKS] = int(startingBlocks[index]/totalBlockFactor*blocksTotal)
+                player[SEASONBLOCKS] += player[GAMEBLOCKS]  # accumlate scores across games
+                index +=1
         index = 0
-        for player in benchList:
-            if int(benchScore[index]/totalScoreFactor*teamScore) == 1:
-                if random.random() > 0.3:
-                    benchScore[index] *= 2
-            player[GAMESCORE] = int(benchScore[index]/totalScoreFactor*teamScore)
-            player[SEASONTOTAL] += player[GAMESCORE]  # accumlate scores across games
-            player[GAMEREBOUNDS] = int(benchRebounds[index]/totalReboundsFactor*teamRebounds)
-            player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
-            player[GAMEASSISTS] = int(benchAssists[index]/totalAssistsFactor*assistsTotal)
-            player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across games
-            index +=1
+        for player in team:
+            if player[PLAYERSTATUS] == ROTATION:
+                if int(benchScore[index]/totalScoreFactor*teamScore) == 1:
+                    if random.random() > 0.3:
+                        benchScore[index] *= 2
+                player[GAMESCORE] = int(benchScore[index]/totalScoreFactor*teamScore)
+                player[SEASONTOTAL] += player[GAMESCORE]  # accumlate scores across games
+                player[GAMEREBOUNDS] = int(benchRebounds[index]/totalReboundsFactor*teamRebounds)
+                player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
+                player[GAMEASSISTS] = int(benchAssists[index]/totalAssistsFactor*assistsTotal)
+                player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across game
+                index +=1
+        for player in team:
+            if (player[PLAYERSTATUS] == BENCHED) or (player[PLAYERSTATUS] == REDSHIRT):
+                player[GAMESCORE] = 0
+                player[GAMEREBOUNDS] = 0
+                player[GAMEASSISTS] = 0
+                index +=1
 
 
         ###################################################
@@ -783,11 +911,12 @@ for year in range(1, 21):
         #   bench players either get 1 or 2, depending on if they
         #   contributed to game results
         for player in team:
-            player[SEASONEXP] += 3
-        for player in benchList:
-            player[SEASONEXP] +=1
-            if ((player[GAMESCORE] > 0) or (player[GAMEREBOUNDS] > 0) or (player[GAMEASSISTS] > 0) or (player[GAMEBLOCKS] > 0)):
-                player[SEASONEXP] +=1
+            if player[PLAYERSTATUS] == STARTER:
+                player[SEASONEXP] += 3
+            elif player[PLAYERSTATUS] == ROTATION:
+                player[SEASONEXP] += 2
+            else:
+                player[SEASONEXP] += 1
 
         ###################################################
         #  Display Team Roster & Statistics
@@ -795,28 +924,22 @@ for year in range(1, 21):
         print("*\tPlayer Scores")
         index1 = 1
         for player in team:
-            print("*\t{}\t{:10}\t{}\t\tAvg: {:4.1f}\t\tReb: {}\t\tAvg: {:4.1f}\t\tAst: {}\t\tAvg: {:4.1f}\t\tBlk: {}\t\tAvg: {:4.1f}\t{}\t\t{:10}\tOff: {}\tDef: {}\tExp: {}"
+            print("*\t{}\t{:10}\t{}\t\tAvg: {:4.1f}\t\tReb: {}\t\tAvg: {:4.1f}\t\tAst: {}\t\tAvg: {:4.1f}\t\tBlk: {}\t\tAvg: {:4.1f}\t{}\t\t{:10}\tOff: {:2}\tDef: {:2}\tExp: {}\t{}"
                   "".format(index1, player[NAME], player[GAMESCORE], round(player[SEASONTOTAL]/gameNumber, 2), player[GAMEREBOUNDS], round(player[SEASONREBOUNDS]/gameNumber, 2),
                             player[GAMEASSISTS], round(player[SEASONASSISTS]/gameNumber, 2),  player[GAMEBLOCKS], round(player[SEASONBLOCKS]/gameNumber, 2),
-                            player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST], player[SEASONEXP]))
-            index1 += 1
-        for player in benchList:
-            print("*\t{}\t{:10}\t{}\t\tAvg: {:4.1f}\t\tReb: {}\t\tAvg: {:4.1f}\t\tAst: {}\t\tAvg: {:4.1f}\t\tBlk: {}\t\tAvg: {:4.1f}\t{}\t\t{:10}\tOff: {}\tDef: {}\tExp: {}"
-                  "".format(index1, player[NAME], player[GAMESCORE], round(player[SEASONTOTAL]/gameNumber, 2), player[GAMEREBOUNDS], round(player[SEASONREBOUNDS]/gameNumber, 2),
-                            player[GAMEASSISTS], round(player[SEASONASSISTS]/gameNumber, 2),  player[GAMEBLOCKS], round(player[SEASONBLOCKS]/gameNumber, 2),
-                            player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST], player[SEASONEXP]))
+                            player[POSITION], player[YEAR], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]), player[SEASONEXP], convertStatus(player[PLAYERSTATUS])))
             index1 += 1
         print("*")
 
-        displayMenu(team, benchList, gameNumber)
+        displayMenu(team, gameNumber)
         # since lineup may have changed, need to update team stats
         resultList = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-        updateTeamOffDefStats(team, benchList, resultList)
-        teamOffense, teamDefense, topThreeOff, topThreeDef,  = resultList[0], resultList[1], resultList[2], resultList[3]
+        updateTeamOffDefStats(team, resultList)
+        teamOffense, teamDefense, benchOffense, benchDefense,  = resultList[0], resultList[1], resultList[2], resultList[3]
         assistFactor = resultList[4]
         blockFactor = resultList[5]
 
-        passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, topThreeDef, blockFactor)
+        passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, benchOffense, benchDefense, blockFactor)
 
         print("*******************************************************")
         print("*")
@@ -841,21 +964,13 @@ for year in range(1, 21):
     for player in team:
         # update career statistics
         player[CAREERTOTAL] = (player[SEASONTOTAL] + player[CAREERTOTAL]*player[CAREERGAMES])/(1+player[CAREERGAMES])
+        player[CAREERREBOUNDS] = (player[SEASONREBOUNDS] + player[CAREERREBOUNDS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
+        player[CAREERASSISTS] = (player[SEASONASSISTS] + player[CAREERASSISTS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
+        player[CAREERBLOCKS] = (player[SEASONBLOCKS] + player[CAREERBLOCKS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
         player[CAREERGAMES] += 1
         # print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}"
         #       "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10))
 
-        print("*\t{:10}\t\tAvg: {:4.1f}\t\tCareer: {:4.1f}\t\tReb: {:4.1f}\t\tCareer: {:4.1f}\t\tAst: {:4.1f}\t\tAvg: {:4.1f}\t\tBlk: {:4.1f}\t\tAvg: {:4.1f}\t{:10}\t{}"
-              "".format(player[NAME], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10, player[SEASONREBOUNDS]/10, player[CAREERREBOUNDS]/10,
-                        player[SEASONASSISTS]/10,  player[CAREERASSISTS]/10, player[SEASONBLOCKS]/10, player[CAREERBLOCKS]/10,
-                        player[POSITION], player[YEAR]))
-
-    for player in benchList:
-        # update career statistics
-        player[CAREERTOTAL] = (player[SEASONTOTAL] + player[CAREERTOTAL]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-        player[CAREERGAMES] += 1
-        # print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}"
-        #       "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10))
         print("*\t{:10}\t\tAvg: {:4.1f}\t\tCareer: {:4.1f}\t\tReb: {:4.1f}\t\tCareer: {:4.1f}\t\tAst: {:4.1f}\t\tAvg: {:4.1f}\t\tBlk: {:4.1f}\t\tAvg: {:4.1f}\t{:10}\t{}"
               "".format(player[NAME], player[SEASONTOTAL]/10, player[CAREERTOTAL]/10, player[SEASONREBOUNDS]/10, player[CAREERREBOUNDS]/10,
                         player[SEASONASSISTS]/10,  player[CAREERASSISTS]/10, player[SEASONBLOCKS]/10, player[CAREERBLOCKS]/10,
@@ -864,118 +979,112 @@ for year in range(1, 21):
     # advance starting players
     print("*******************************************************")
     print("*\tNew Team")
-    teamOffense = 0
-    teamDefense = 0
+    # teamOffense = 0
+    # teamDefense = 0
     removeList = []
     for player in team:
         if player[YEAR] == "Senior":
-            removeList.append(list(player))
+            removeList.append(player)
             print("*\t{} has graduated".format(player[NAME]))
         else:
-            player[OFFENSE] += random.randint(0, 1)
-            player[DEFENSE] += random.randint(0, 1)
-            player[ASSISTS] += random.randint(0, 1)
+            if player[SEASONEXP] > 20:
+                if random.random() > 0.35:
+                    player[OFFENSE] += 1
+                if random.random() > 0.35:
+                    player[DEFENSE] += 1
+                if random.random() > 0.35:
+                    player[ASSISTS] += 1
+                if (player[POSITION] != "GUARD"):
+                    if random.random() > 0.35:
+                        player[BLOCKS] += 1
+            elif player[SEASONEXP] > 10:
+                if random.random() > 0.5:
+                    player[OFFENSE] += 1
+                if random.random() > 0.5:
+                    player[DEFENSE] += 1
+                if random.random() > 0.5:
+                    player[ASSISTS] += 1
+                if (player[POSITION] != "GUARD"):
+                    if random.random() > 0.5:
+                        player[BLOCKS] += 1
+            else:
+                if random.random() > 0.65:
+                    player[OFFENSE] += 1
+                if random.random() > 0.65:
+                    player[DEFENSE] += 1
+                if random.random() > 0.65:
+                    player[ASSISTS] += 1
+                if (player[POSITION] != "GUARD"):
+                    if random.random() > 0.65:
+                        player[BLOCKS] += 1
 
-            if (player[POSITION] != "GUARD"):
-                player[BLOCKS] += random.randint(0, 1)
-
-            if player[YEAR] == "Freshman":
+            if (player[YEAR] == "Freshman") and (player[PLAYERSTATUS] != REDSHIRT):
                 player[YEAR] = "Sophomore"
             elif player[YEAR] == "Sophomore":
                 player[YEAR] = "Junior"
             else:
                 player[YEAR] = "Senior"
+            if (player[PLAYERSTATUS] == REDSHIRT):
+                player[YEAR] = "Freshman"
 
             # update offense and defense estimates
             updateOffDeffEstimates(player, 0.1, 0.9, False)
 
-            # update career statistics
-            player[CAREERTOTAL] = (player[SEASONTOTAL] + player[CAREERTOTAL]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-            player[CAREERREBOUNDS] = (player[SEASONREBOUNDS] + player[CAREERREBOUNDS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-            player[CAREERASSISTS] = (player[SEASONASSISTS] + player[CAREERASSISTS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-            player[CAREERBLOCKS] = (player[SEASONBLOCKS] + player[CAREERBLOCKS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-            player[CAREERGAMES] += 1
-
-            print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}\tReb Ave: {:4.3}\tAst Avg: {:4.3}"
-                  "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10,
-                            player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10, player[CAREERASSISTS]/10))
-
-            player[SEASONTOTAL] = 0  # reset season average
-            player[SEASONREBOUNDS] = 0  # reset season average
-            player[SEASONASSISTS] = 0  # reset season average
-            player[SEASONBLOCKS] = 0  # reset season average
-            player[SEASONEXP] = 0   # reset season experience
+            print("*\tName: {:10}  \tPosition: {}  \tOffense: {:2}  \tDefense: {:2} \tYear: {}\tAve: {:4.1f}\tCareer: {:4.1f}\tReb Ave: {:4.1f}\tAst Avg: {:4.1f}\tStatus: {}"
+                    "".format(player[NAME], player[POSITION], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]), player[YEAR], player[SEASONTOTAL]/10,
+                            player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10, player[CAREERASSISTS]/10, convertStatus(player[PLAYERSTATUS])))
+        player[SEASONTOTAL] = 0  # reset season average
+        player[SEASONREBOUNDS] = 0  # reset season average
+        player[SEASONASSISTS] = 0  # reset season average
+        player[SEASONBLOCKS] = 0  # reset season average
+        player[SEASONEXP] = 0   # reset season experience
 
     for player in removeList:
-        team.remove(player)
-
-    # advance bench list
-    removeList = []
-    for player in benchList:
-        if player[YEAR] == "Senior":
-            removeList.append(list(player))
-            print("*\t{} has graduated".format(player[NAME]))
-        else:
-            player[OFFENSE] += random.randint(0, 1)
-            player[DEFENSE] += random.randint(0, 1)
-            player[ASSISTS] += random.randint(0, 1)
-            if (player[POSITION] != "GUARD"):
-                player[BLOCKS] += random.randint(0, 1)
-
-            if player[YEAR] == "Freshman":
-                player[YEAR] = "Sophomore"
-            elif player[YEAR] == "Sophomore":
-                player[YEAR] = "Junior"
-            else:
-                player[YEAR] = "Senior"
-
-            # update offense and defense estimates
-            updateOffDeffEstimates(player, 0.1, 0.9, False)
-
-            # update career statistics
-            player[CAREERTOTAL] = (player[SEASONTOTAL] + player[CAREERTOTAL]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-            player[CAREERREBOUNDS] = (player[SEASONREBOUNDS] + player[CAREERREBOUNDS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-            player[CAREERASSISTS] = (player[SEASONASSISTS] + player[CAREERASSISTS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-            player[CAREERBLOCKS] = (player[SEASONBLOCKS] + player[CAREERBLOCKS]*player[CAREERGAMES])/(1+player[CAREERGAMES])
-            player[CAREERGAMES] += 1
-
-            print("*\tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\tAve: {:4.3}\tCareer: {:4.3}\tReb Ave: {:4.3}\tAst Avg: {:4.3}"
-                  "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], player[SEASONTOTAL]/10,
-                            player[CAREERTOTAL]/10, player[CAREERREBOUNDS]/10, player[CAREERASSISTS]/10))
-            player[SEASONTOTAL] = 0  # reset season average
-            player[SEASONREBOUNDS] = 0  # reset season average
-            player[SEASONASSISTS] = 0  # reset season average
-            player[SEASONBLOCKS] = 0  # reset season average
-            player[SEASONEXP] = 0   # reset season experience
-
-    for player in removeList:
-        benchList.remove(player)
-
+        if player in team:
+            team.remove(player)
     print("*")
+    print("* Consider updating player status before recruiting")
+    displayMenu(team, 1)
+
+    resultList = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
+    updateTeamOffDefStats(team, resultList)
+    teamOffense, teamDefense, benchOffense, benchDefense,  = resultList[0], resultList[1], resultList[2], resultList[3]
+    assistFactor = resultList[4]
+    blockFactor = resultList[5]
+    passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, benchOffense, benchDefense, blockFactor)
+    print("*******************************************************")
+    print("*")
+    print("*\tTeam Scorecard")
+    print("*")
+    print("*\tStarting Offense: \t{} \tStarting Defense: \t{}".format(startingOffSummary, startingDefSummary))
+    print("*\tBench Offense: \t\t{}  \tBench Defense: \t\t{}".format(benchOffSummary, benchDefSummary))
+    print("*\tPassing Report\t\t{} \tBlocking Report: \t{}".format(passingSummary, blockSummary))
+    print("*")
+    print("*******************************************************")
 
     name1 = nameList[random.randint(0, len(nameList)-1)]
-    recruit1 = [name1, "Center", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BENCHED]
+    recruit1 = [name1, "Center", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ROTATION, 0, 0]
     name1 = nameList[random.randint(0, len(nameList)-1)]
-    recruit2 = [name1, "Forward", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BENCHED]
+    recruit2 = [name1, "Forward", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ROTATION, 0, 0]
     name1 = nameList[random.randint(0, len(nameList)-1)]
-    recruit3 = [name1, "Forward", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BENCHED]
+    recruit3 = [name1, "Forward", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ROTATION, 0, 0]
     name1 = nameList[random.randint(0, len(nameList)-1)]
-    recruit4 = [name1, "Guard", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BENCHED]
+    recruit4 = [name1, "Guard", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ROTATION, 0, 0]
     name1 = nameList[random.randint(0, len(nameList)-1)]
-    recruit5 = [name1, "Guard", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BENCHED]
+    recruit5 = [name1, "Guard", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ROTATION, 0, 0]
     name1 = nameList[random.randint(0, len(nameList)-1)]
-    recruit6 = [name1, "Center", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BENCHED]
+    recruit6 = [name1, "Center", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ROTATION, 0, 0]
     name1 = nameList[random.randint(0, len(nameList)-1)]
-    recruit7 = [name1, "Forward", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BENCHED]
+    recruit7 = [name1, "Forward", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ROTATION, 0, 0]
     name1 = nameList[random.randint(0, len(nameList)-1)]
-    recruit8 = [name1, "Guard", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, BENCHED]
+    recruit8 = [name1, "Guard", 3 + random.randint(0, 1), 3 + random.randint(0, 1), "Freshman", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, ROTATION, 0, 0]
 
     recruits = [recruit1, recruit2, recruit3, recruit4, recruit5, recruit6, recruit7, recruit8]
 
     # boost some recruit candidates scores
-    index = 1
-    for player in recruits:
-        index += 1
+    # index = 1
+    # for player in recruits:
+    #     index += 1
     for player in recruits:
         boostCheck = random.random()
         if boostCheck >= 0.8:
@@ -1010,8 +1119,9 @@ for year in range(1, 21):
     print("*******************************************************")
     index = 1
     for player in recruits:
-        print("#{} \tName: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}"
-              "".format(index, player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR]))
+        print("#{} \tName: {:10}  \tPosition: {}  \tOffense: {:2}  \tDefense: {:2}\tAssits: {:2}\tBlocks: {:2} \tYear: {}"
+              "".format(index, player[NAME], player[POSITION], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]),
+                        conODA(player[ASSISTEST]), conBlock(player[BLOCKEST]), player[YEAR]))
         index += 1
 
     selectedRecruits = []
@@ -1031,121 +1141,80 @@ for year in range(1, 21):
 
 
     # put all the team members (prior starters, prior bench, new recruits) into one list
-    for player in benchList:
-        team.append(list(player))
-    benchList = []
     print("Here are the selected recruits:")
     for player in selectedRecruits:
-        print("Name: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}"
-              "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR]))
+        print("Name: {:10}  \tPosition: {}  \tOffense: {:2}  \tDefense: {:2}\tAssists: {:2}\tBlocks: {:2} \tYear: {}"
+              "".format(player[NAME], player[POSITION], conODA(player[OFFENSEEST]), conODA(player[DEFENSEEST]),
+                        conODA(player[ASSISTEST]), conBlock(player[BLOCKEST]), player[YEAR]))
         team.append(list(player))
 
     input("Type Enter to Continue")
 
-    # sort the team
-    newTeamOrder = []
-    for player in team:
-        if player[POSITION] == "Center":
-            newTeamOrder.append(list(player))
-    for player in team:
-        if player[POSITION] == "Forward":
-            newTeamOrder.append(list(player))
-    for player in team:
-        if player[POSITION] == "Guard":
-            newTeamOrder.append(list(player))
-    team = newTeamOrder
+    # # sort the team
+    # newTeamOrder = []
+    # for player in team:
+    #     if player[POSITION] == "Center":
+    #         newTeamOrder.append(list(player))
+    # for player in team:
+    #     if player[POSITION] == "Forward":
+    #         newTeamOrder.append(list(player))
+    # for player in team:
+    #     if player[POSITION] == "Guard":
+    #         newTeamOrder.append(list(player))
+    # team = newTeamOrder
 
-    done = False
-    removeList = []
-    while not done:
-        print()
-        print("*******************************************************")
-        print("*")
-        print("*\tHere is the new team")
-        print("*")
-        print("*******************************************************")
-        for player in team:
-            print("*\t{:10}\t\tAvg: {:4.1f}\t\tReb Avg: {:4.1f}\t\tAst Avg: {:4.1f}\t\tBlk Avg: {:4.1f}\t{}\t\t{:10}\tOff: {}\t\t Def: {}"
-                  "".format(player[NAME], player[CAREERTOTAL]/gameNumber, player[CAREERREBOUNDS]/gameNumber,
-                            player[CAREERASSISTS]/gameNumber, player[CAREERBLOCKS]/gameNumber, player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST]))
+    # done = False
+    # removeList = []
 
-        print("Decide who to bench for the next season")
-
-        for player in team:
-            print("Bench {}? Y or N".format(player[NAME]))
-            answer = input()
-            if (answer == "Y") or (answer == 'y'):
-                removeList.append(list(player))
-        for player in removeList:
-            if player in team:
-                team.remove(player)
-
-        if len(team) == 5:
-            done = True
-
-        benchList = list(removeList)
-
-    print("*******************************************************")
-    print("*")
-    print("*\tStarting Team")
-    print("*")
-    print("*******************************************************")
-    teamOffense = 0
-    teamDefense = 0
-    for player in team:
-        print("Name: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}"
-              "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR]))
-        teamOffense += player[OFFENSE]/5
-        teamDefense += player[DEFENSE]/5
-
-    print("*******************************************************")
-    print("*")
-    print("*\tBench Team")
-    print("*")
-    print("*******************************************************")
-    for player in benchList:
-        print("Name: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}"
-              "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR]))
-
-
-    benchOffense = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    benchDefense = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    for player in benchList:
-        benchOffense[player[OFFENSE]] += 1
-        benchDefense[player[DEFENSE]] += 1
-        # print("Offense Vector", benchOffense)
-        # print("Defense Vector", benchDefense)
-
-    topThreeOffIncr = 0
-    topThreeDefIncr = 0
-    topThreeOff = 0
-    topThreeDef = 0
-    for index in range(9,-1,-1):
-        # print("Index {}".format(index))
-        if benchOffense[index] != 0:
-            while (topThreeOffIncr < 3) and (benchOffense[index] > 0):
-                # print("OFF While Loop topThreeOffIncr {}  benchOffense index {}".format(topThreeOffIncr, benchOffense[index]))
-                topThreeOffIncr += 1
-                benchOffense[index] -= 1
-                topThreeOff += index
-        if benchDefense[index] != 0:
-            while (topThreeDefIncr < 3) and (benchDefense[index] > 0):
-                # print("DEF While Loop topThreeOffIncr {}  benchOffense index {}".format(topThreeOffIncr, benchOffense[index]))
-                topThreeDefIncr += 1
-                benchDefense[index] -= 1
-                topThreeDef += index
-    topThreeOff /= 3
-    topThreeDef /=3
-
-    # print("Average Bench Offense {}".format(topThreeOff))
-    # print("Average Bench Defense {}".format(topThreeDef))
+    # print()
+    # print("*******************************************************")
+    # print("*")
+    # print("*\tHere is the new team")
+    # print("*")
+    # print("*******************************************************")
+    # for player in team:
+    #     print("*\t{:10}\t\tAvg: {:4.1f}\t\tReb Avg: {:4.1f}\t\tAst Avg: {:4.1f}\t\tBlk Avg: {:4.1f}\t{}\t\t{:10}\tOff: {}\t\t Def: {}\tStatus: {}"
+    #             "".format(player[NAME], player[CAREERTOTAL]/gameNumber, player[CAREERREBOUNDS]/gameNumber,
+    #                     player[CAREERASSISTS]/gameNumber, player[CAREERBLOCKS]/gameNumber, player[POSITION], player[YEAR], player[OFFENSEEST], player[DEFENSEEST], convertStatus(player[PLAYERSTATUS])))
+    #
+    # print("Decide who to play for the next season")
+    #
+    # for player in team:
+    #     print("For {}\t1 - Start, 2 - Rotate Off Bench 3 - Do Not Play 4 - Red Shirt".format(player[NAME]))
+    #     answer = input()
+    #     player[PLAYERSTATUS] = BENCHED
+    #     if (int(answer) == 1):
+    #         player[PLAYERSTATUS] = STARTER
+    #     elif (int(answer) == 2):
+    #         player[PLAYERSTATUS] = ROTATION
+    #     elif int(answer) == 3:
+    #         player[PLAYERSTATUS] = BENCHED
+    #     elif int(answer) == 4:
+    #         if player[YEAR] == "Freshman":
+    #             player[PLAYERSTATUS] = REDSHIRT
+    #
+    # print("*******************************************************")
+    # print("*")
+    # print("*\tTeam")
+    # print("*")
+    # print("*******************************************************")
+    # teamOffense = 0
+    # teamDefense = 0
+    # benchOffense = 0
+    # benchDefense = 0
+    # for player in team:
+    #     print("Name: {:10}  \tPosition: {}  \tOffense: {}  \tDefense: {} \tYear: {}\t{}"
+    #           "".format(player[NAME], player[POSITION], player[OFFENSEEST], player[DEFENSEEST], player[YEAR], convertStatus(player[PLAYERSTATUS])))
+    #     teamOffense += player[OFFENSE]/5
+    #     teamDefense += player[DEFENSE]/5
+    #
 
     resultList = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]
-    updateTeamOffDefStats(team, benchList, resultList)
-    teamOffense, teamDefense, topThreeOff, topThreeDef,  = resultList[0], resultList[1], resultList[2], resultList[3]
+    updateTeamOffDefStats(team, resultList)
+    teamOffense, teamDefense, benchOffense, benchDefense,  = resultList[0], resultList[1], resultList[2], resultList[3]
     assistFactor = resultList[4]
     blockFactor = resultList[5]
-    passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, topThreeOff, topThreeDef, blockFactor)
+    passingSummary, startingOffSummary, startingDefSummary, benchOffSummary, benchDefSummary, blockSummary = convertTeamStatsToText(assistFactor, teamOffense, teamDefense, benchOffense, benchDefense, blockFactor)
 
     print("*******************************************************")
     print("*")
