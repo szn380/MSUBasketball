@@ -95,28 +95,32 @@ def updateOffDeffEstimates(player, boundaryLow, boundaryHigh, limit):
         if (randomNumber < boundaryLow) and (player[OFFENSE] < 6):
             player[OFFENSEEST] += 1
         elif (randomNumber > boundaryHigh) and (player[OFFENSE] > 3):
-            player[OFFENSEEST] -= 1
+            if player[RECRUITCOST] != 6:
+                player[OFFENSEEST] -= 1
 
         randomNumber = random.random()
         player[DEFENSEEST] = player[DEFENSE]
         if (randomNumber < boundaryLow) and (player[DEFENSE] < 6):
             player[DEFENSEEST] += 1
         elif (randomNumber > boundaryHigh) and (player[DEFENSE] > 3):
-            player[DEFENSEEST] -= 1
+            if player[RECRUITCOST] != 6:
+                player[DEFENSEEST] -= 1
 
         randomNumber = random.random()
         player[ASSISTEST] = player[ASSISTS]
         if (randomNumber < boundaryLow) and (player[ASSISTS] < 6):
             player[ASSISTEST] += 1
         elif (randomNumber > boundaryHigh) and (player[ASSISTS] > 3):
-            player[ASSISTEST] -= 1
+            if player[RECRUITCOST] != 6:
+                player[ASSISTEST] -= 1
 
         randomNumber = random.random()
         player[BLOCKEST] = player[BLOCKS]
         if (randomNumber < boundaryLow) and (player[BLOCKS] < 6):
             player[BLOCKEST] += 1
         elif (randomNumber > boundaryHigh) and (player[BLOCKS] > 3):
-            player[BLOCKEST] -= 1
+            if player[RECRUITCOST] != 6:
+                player[BLOCKEST] -= 1
 
     return
 
@@ -880,13 +884,13 @@ def allocateStatsToPlayers(team, teamScore,  assistFactor, blockFactor):
     index = 0
     for player in team:
         if player[PLAYERSTATUS] == STARTER:
-            player[GAMESCORE] = int(startingScore[index]/totalScoreFactor*teamScore)
+            player[GAMESCORE] = int(round(startingScore[index]/totalScoreFactor*teamScore))
             player[SEASONTOTAL] += player[GAMESCORE]  # accumlate scores across games
-            player[GAMEREBOUNDS] = int(startingRebounds[index]/totalReboundsFactor*teamRebounds)
+            player[GAMEREBOUNDS] = int(round(startingRebounds[index]/totalReboundsFactor*teamRebounds))
             player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
-            player[GAMEASSISTS] = int(startingAssists[index]/totalAssistsFactor*assistsTotal)
+            player[GAMEASSISTS] = int(round(startingAssists[index]/totalAssistsFactor*assistsTotal))
             player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across games
-            player[GAMEBLOCKS] = int(startingBlocks[index]/totalBlockFactor*blocksTotal)
+            player[GAMEBLOCKS] = int(round(startingBlocks[index]/totalBlockFactor*blocksTotal))
             player[SEASONBLOCKS] += player[GAMEBLOCKS]  # accumlate scores across games
             index +=1
     index = 0
@@ -895,11 +899,11 @@ def allocateStatsToPlayers(team, teamScore,  assistFactor, blockFactor):
             if int(benchScore[index]/totalScoreFactor*teamScore) == 1:
                 if random.random() > 0.3:
                     benchScore[index] *= 2
-            player[GAMESCORE] = int(benchScore[index]/totalScoreFactor*teamScore)
+            player[GAMESCORE] = int(round(benchScore[index]/totalScoreFactor*teamScore))
             player[SEASONTOTAL] += player[GAMESCORE]  # accumlate scores across games
-            player[GAMEREBOUNDS] = int(benchRebounds[index]/totalReboundsFactor*teamRebounds)
+            player[GAMEREBOUNDS] = int(round(benchRebounds[index]/totalReboundsFactor*teamRebounds))
             player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
-            player[GAMEASSISTS] = int(benchAssists[index]/totalAssistsFactor*assistsTotal)
+            player[GAMEASSISTS] = int(round(benchAssists[index]/totalAssistsFactor*assistsTotal))
             player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across game
             index +=1
     for player in team:
@@ -1134,6 +1138,15 @@ for year in range(1, 21):
         # adjust score if it is a tied score
         if teamScore == opponentScore:
             teamScore += 1
+
+        allocateStatsToPlayers(team, teamScore,  assistFactor, blockFactor)
+        # due to rounding, need to recalculate team score from actual results so that the team score
+        # sum of player scores match
+        teamScore = 0
+        for players in team:
+            print("DEBUG {}".format(teamScore))
+            teamScore += players[GAMESCORE]
+
         print("*******************************************************")
         print("*")
         # print results and accumulate win / loss
@@ -1145,7 +1158,7 @@ for year in range(1, 21):
             teamLoses += 1
             lastGameWin = "E"
 
-        allocateStatsToPlayers(team, teamScore,  assistFactor, blockFactor)
+
 
         ###################################################
         #  Determine Player Experience
