@@ -13,6 +13,7 @@ nameList9 = ["Hacksaw", "Bonesaw", "Ace", "Psycho", "Scott", "Logan", "Guido", "
 nameList = nameList1 + nameList2 + nameList3 + nameList4 + nameList5 + nameList6 + nameList7 + nameList8 + nameList9
 
 opponentList = ["CMU", "Indiana", "Illinois", "Purdue", "Ohio State", "Wisconson", "Minnisota", "Northwestern", "Iowa", "UofM"]
+
 NAME = 0                # type string - first name
 POSITION = 1            # type string - name of position
 OFFENSE = 2             # integer [1..10] -  offense scoring factor (not known to game player)
@@ -1061,8 +1062,10 @@ print("*\tPassing Report\t\t{} \tBlocking Report: \t{}".format(passingSummary, b
 print("*")
 print("*******************************************************")
 
+overallYear = 1978
+gameRecord = []
 for year in range(1, 21):
-
+    overallYear += 1
     print("*******************************************************")
     print("*")
     print("*\tSeason #{}".format(year))
@@ -1144,8 +1147,9 @@ for year in range(1, 21):
         # sum of player scores match
         teamScore = 0
         for players in team:
-            print("DEBUG {}".format(teamScore))
             teamScore += players[GAMESCORE]
+        if teamScore == opponentScore:
+            teamScore -= 1
 
         print("*******************************************************")
         print("*")
@@ -1210,7 +1214,9 @@ for year in range(1, 21):
         print("*")
         print("*******************************************************")
 
-
+    ###################################################
+    #   End of Season
+    ###################################################
     print("*******************************************************")
     print("*")
     print("Final Record: {}-{}".format(teamWins, teamLoses))
@@ -1218,23 +1224,41 @@ for year in range(1, 21):
     print("*******************************************************")
     input("\nType Enter to Continue: ")
 
+    ###################################################
+    #   To support determining Coaches Score, evaluate player experience gained during the season
+    ###################################################
     teamExperience = 0
     numPlayers = 0
     for player in team:
         numPlayers += 1
         teamExperience += player[SEASONEXP]
-        # print("DEBUG team EXP {} Player Exp {}".format(teamExperience, player[SEASONEXP]))
     if numPlayers != 0:
         teamExperience = teamExperience / numPlayers / 10   # this is average player experience per game
     else:
         print("FATAL ERROR: Divide by Zero - numPlayers")
 
+    ###################################################
+    #   Display Coach's Score
+    ###################################################
     print("*******************************************************")
     print("*")
-    print("*\tCoaches Score")
+    print("*\tCoach's Score")
     print("*\tGames Won: {}\t\tPlayer Development: {}".format(conTeamWins(teamWins),conTeamExp(teamExperience)))
     print("\tUofM Game: {}".format(lastGameWin))
     print("\tOverall Rating: {}".format(overallRating(teamWins, teamExperience, lastGameWin)))
+    print("*")
+    print("*******************************************************")
+    input("\nType Enter to Continue: ")
+
+    ###################################################
+    #   Display History of Team Record
+    ###################################################
+    gameRecord.append([overallYear, teamWins, teamLoses, overallRating(teamWins, teamExperience, lastGameWin)])
+    print("*******************************************************")
+    print("*")
+    print("*\tHistory")
+    for historyIndex in gameRecord:
+        print("*\tYear: {}\tRecord: {}-{}\tCoaches Rating: {}".format(historyIndex[0], historyIndex[1], historyIndex[2], historyIndex[3]))
     print("*")
     print("*******************************************************")
     input("\nType Enter to Continue: ")
@@ -1256,7 +1280,9 @@ for year in range(1, 21):
                         player[SEASONASSISTS]/10,  player[CAREERASSISTS]/10, player[SEASONBLOCKS]/10, player[CAREERBLOCKS]/10,
                         player[POSITION], player[YEAR]))
 
-    # advance starting players
+    ###################################################
+    #   Update Players Skills Based In Part on Experience Gained
+    ###################################################
     print("*******************************************************")
     print("*\tNew Team")
     # teamOffense = 0
@@ -1366,9 +1392,9 @@ for year in range(1, 21):
     print("*")
     print("*\tTeam Scorecard")
     print("*")
-    print("*\tStarting Offense: \t{} \tStarting Defense: \t{}".format(startingOffSummary, startingDefSummary))
-    print("*\tBench Offense: \t\t{}  \tBench Defense: \t\t{}".format(benchOffSummary, benchDefSummary))
-    print("*\tPassing Report\t\t{} \tBlocking Report: \t{}".format(passingSummary, blockSummary))
+    print("*\tStarting Offense: \t{:2} \tStarting Defense: \t{}".format(startingOffSummary, startingDefSummary))
+    print("*\tBench Offense: \t\t{:2} \tBench Defense: \t\t{}".format(benchOffSummary, benchDefSummary))
+    print("*\tPassing Report\t\t{:2} \tBlocking Report: \t{}".format(passingSummary, blockSummary))
     print("*")
     print("*******************************************************")
 
