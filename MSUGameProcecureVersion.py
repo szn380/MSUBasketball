@@ -12,8 +12,7 @@ nameList8 = ["Red", "Gerard", "Caleb", "Cameron", "Clyde", "Duane", "Dudley", "E
 nameList9 = ["Hacksaw", "Bonesaw", "Ace", "Psycho", "Scott", "Logan", "Guido", "Mario", "Luigi", "Dean"]
 nameList = nameList1 + nameList2 + nameList3 + nameList4 + nameList5 + nameList6 + nameList7 + nameList8 + nameList9
 
-opponentList = ["CMU", "Indiana", "Illinois", "Purdue", "Ohio State", "Wisconson", "Minnisota", "Northwestern", "Iowa", "UofM"]
-
+opponentList = ["Toledo", "CMU", "UofD", "Oakland", "Notre Dame", "Indiana", "Illinois", "Purdue", "Ohio State", "Wisconson", "Minnisota", "Northwestern", "Iowa", "UofM"]
 NAME = 0                # type string - first name
 POSITION = 1            # type string - name of position
 OFFENSE = 2             # integer [1..10] -  offense scoring factor (not known to game player)
@@ -96,32 +95,28 @@ def updateOffDeffEstimates(player, boundaryLow, boundaryHigh, limit):
         if (randomNumber < boundaryLow) and (player[OFFENSE] < 6):
             player[OFFENSEEST] += 1
         elif (randomNumber > boundaryHigh) and (player[OFFENSE] > 3):
-            if player[RECRUITCOST] != 6:
-                player[OFFENSEEST] -= 1
+            player[OFFENSEEST] -= 1
 
         randomNumber = random.random()
         player[DEFENSEEST] = player[DEFENSE]
         if (randomNumber < boundaryLow) and (player[DEFENSE] < 6):
             player[DEFENSEEST] += 1
         elif (randomNumber > boundaryHigh) and (player[DEFENSE] > 3):
-            if player[RECRUITCOST] != 6:
-                player[DEFENSEEST] -= 1
+            player[DEFENSEEST] -= 1
 
         randomNumber = random.random()
         player[ASSISTEST] = player[ASSISTS]
         if (randomNumber < boundaryLow) and (player[ASSISTS] < 6):
             player[ASSISTEST] += 1
         elif (randomNumber > boundaryHigh) and (player[ASSISTS] > 3):
-            if player[RECRUITCOST] != 6:
-                player[ASSISTEST] -= 1
+            player[ASSISTEST] -= 1
 
         randomNumber = random.random()
         player[BLOCKEST] = player[BLOCKS]
         if (randomNumber < boundaryLow) and (player[BLOCKS] < 6):
             player[BLOCKEST] += 1
         elif (randomNumber > boundaryHigh) and (player[BLOCKS] > 3):
-            if player[RECRUITCOST] != 6:
-                player[BLOCKEST] -= 1
+            player[BLOCKEST] -= 1
 
     return
 
@@ -362,8 +357,15 @@ def updateTeamOffDefStats(team, resultList):
             benchOffense += player[OFFENSE]
             benchDefense += player[DEFENSE]
             rotationCount += 1
-    benchOffense = benchOffense / rotationCount
-    benchDefense = benchDefense / rotationCount
+    if rotationCount > 0:
+        benchOffense = benchOffense / rotationCount
+        benchDefense = benchDefense / rotationCount
+    else:
+
+
+
+        benchOffense = 0
+        benchDefense = 0
 
     assistFactor = (2*teamAssistMax + teamAssist)/3
 
@@ -407,7 +409,11 @@ class opponentInfo:
         self.opponentDefense = 0
         self.wins = 0
 
-        section = random.randint(1, 10)
+        if gameNumber < 5:
+            section = random.randint(1, 7)
+        else:
+            section = random.randint(1, 10)
+
         if section == 1:
             self.opponentOffense = 2.7 + random.random()
         elif section < 4:
@@ -885,13 +891,13 @@ def allocateStatsToPlayers(team, teamScore,  assistFactor, blockFactor):
     index = 0
     for player in team:
         if player[PLAYERSTATUS] == STARTER:
-            player[GAMESCORE] = int(round(startingScore[index]/totalScoreFactor*teamScore))
+            player[GAMESCORE] = int(startingScore[index]/totalScoreFactor*teamScore)
             player[SEASONTOTAL] += player[GAMESCORE]  # accumlate scores across games
-            player[GAMEREBOUNDS] = int(round(startingRebounds[index]/totalReboundsFactor*teamRebounds))
+            player[GAMEREBOUNDS] = int(startingRebounds[index]/totalReboundsFactor*teamRebounds)
             player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
-            player[GAMEASSISTS] = int(round(startingAssists[index]/totalAssistsFactor*assistsTotal))
+            player[GAMEASSISTS] = int(startingAssists[index]/totalAssistsFactor*assistsTotal)
             player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across games
-            player[GAMEBLOCKS] = int(round(startingBlocks[index]/totalBlockFactor*blocksTotal))
+            player[GAMEBLOCKS] = int(startingBlocks[index]/totalBlockFactor*blocksTotal)
             player[SEASONBLOCKS] += player[GAMEBLOCKS]  # accumlate scores across games
             index +=1
     index = 0
@@ -900,11 +906,11 @@ def allocateStatsToPlayers(team, teamScore,  assistFactor, blockFactor):
             if int(benchScore[index]/totalScoreFactor*teamScore) == 1:
                 if random.random() > 0.3:
                     benchScore[index] *= 2
-            player[GAMESCORE] = int(round(benchScore[index]/totalScoreFactor*teamScore))
+            player[GAMESCORE] = int(benchScore[index]/totalScoreFactor*teamScore)
             player[SEASONTOTAL] += player[GAMESCORE]  # accumlate scores across games
-            player[GAMEREBOUNDS] = int(round(benchRebounds[index]/totalReboundsFactor*teamRebounds))
+            player[GAMEREBOUNDS] = int(benchRebounds[index]/totalReboundsFactor*teamRebounds)
             player[SEASONREBOUNDS] += player[GAMEREBOUNDS]  # accumlate scores across games
-            player[GAMEASSISTS] = int(round(benchAssists[index]/totalAssistsFactor*assistsTotal))
+            player[GAMEASSISTS] = int(benchAssists[index]/totalAssistsFactor*assistsTotal)
             player[SEASONASSISTS] += player[GAMEASSISTS]  # accumlate scores across game
             index +=1
     for player in team:
@@ -1062,10 +1068,8 @@ print("*\tPassing Report\t\t{} \tBlocking Report: \t{}".format(passingSummary, b
 print("*")
 print("*******************************************************")
 
-overallYear = 1978
-gameRecord = []
 for year in range(1, 21):
-    overallYear += 1
+
     print("*******************************************************")
     print("*")
     print("*\tSeason #{}".format(year))
@@ -1074,7 +1078,7 @@ for year in range(1, 21):
     teamWins = 0
     teamLoses = 0
     playGreenAndWhiteGame(team)
-    for gameNumber in range(1, 11):
+    for gameNumber in range(1, 15):
         opponent = opponentInfo(gameNumber)  # create opponent
         print("*")
         print("*\tNext Game against {}".format(opponentList[gameNumber-1]))
@@ -1141,16 +1145,6 @@ for year in range(1, 21):
         # adjust score if it is a tied score
         if teamScore == opponentScore:
             teamScore += 1
-
-        allocateStatsToPlayers(team, teamScore,  assistFactor, blockFactor)
-        # due to rounding, need to recalculate team score from actual results so that the team score
-        # sum of player scores match
-        teamScore = 0
-        for players in team:
-            teamScore += players[GAMESCORE]
-        if teamScore == opponentScore:
-            teamScore -= 1
-
         print("*******************************************************")
         print("*")
         # print results and accumulate win / loss
@@ -1162,7 +1156,7 @@ for year in range(1, 21):
             teamLoses += 1
             lastGameWin = "E"
 
-
+        allocateStatsToPlayers(team, teamScore,  assistFactor, blockFactor)
 
         ###################################################
         #  Determine Player Experience
@@ -1214,9 +1208,7 @@ for year in range(1, 21):
         print("*")
         print("*******************************************************")
 
-    ###################################################
-    #   End of Season
-    ###################################################
+
     print("*******************************************************")
     print("*")
     print("Final Record: {}-{}".format(teamWins, teamLoses))
@@ -1224,41 +1216,23 @@ for year in range(1, 21):
     print("*******************************************************")
     input("\nType Enter to Continue: ")
 
-    ###################################################
-    #   To support determining Coaches Score, evaluate player experience gained during the season
-    ###################################################
     teamExperience = 0
     numPlayers = 0
     for player in team:
         numPlayers += 1
         teamExperience += player[SEASONEXP]
+        # print("DEBUG team EXP {} Player Exp {}".format(teamExperience, player[SEASONEXP]))
     if numPlayers != 0:
         teamExperience = teamExperience / numPlayers / 10   # this is average player experience per game
     else:
         print("FATAL ERROR: Divide by Zero - numPlayers")
 
-    ###################################################
-    #   Display Coach's Score
-    ###################################################
     print("*******************************************************")
     print("*")
-    print("*\tCoach's Score")
+    print("*\tCoaches Score")
     print("*\tGames Won: {}\t\tPlayer Development: {}".format(conTeamWins(teamWins),conTeamExp(teamExperience)))
     print("\tUofM Game: {}".format(lastGameWin))
     print("\tOverall Rating: {}".format(overallRating(teamWins, teamExperience, lastGameWin)))
-    print("*")
-    print("*******************************************************")
-    input("\nType Enter to Continue: ")
-
-    ###################################################
-    #   Display History of Team Record
-    ###################################################
-    gameRecord.append([overallYear, teamWins, teamLoses, overallRating(teamWins, teamExperience, lastGameWin)])
-    print("*******************************************************")
-    print("*")
-    print("*\tHistory")
-    for historyIndex in gameRecord:
-        print("*\tYear: {}\tRecord: {}-{}\tCoaches Rating: {}".format(historyIndex[0], historyIndex[1], historyIndex[2], historyIndex[3]))
     print("*")
     print("*******************************************************")
     input("\nType Enter to Continue: ")
@@ -1280,9 +1254,7 @@ for year in range(1, 21):
                         player[SEASONASSISTS]/10,  player[CAREERASSISTS]/10, player[SEASONBLOCKS]/10, player[CAREERBLOCKS]/10,
                         player[POSITION], player[YEAR]))
 
-    ###################################################
-    #   Update Players Skills Based In Part on Experience Gained
-    ###################################################
+    # advance starting players
     print("*******************************************************")
     print("*\tNew Team")
     # teamOffense = 0
@@ -1392,9 +1364,9 @@ for year in range(1, 21):
     print("*")
     print("*\tTeam Scorecard")
     print("*")
-    print("*\tStarting Offense: \t{:2} \tStarting Defense: \t{}".format(startingOffSummary, startingDefSummary))
-    print("*\tBench Offense: \t\t{:2} \tBench Defense: \t\t{}".format(benchOffSummary, benchDefSummary))
-    print("*\tPassing Report\t\t{:2} \tBlocking Report: \t{}".format(passingSummary, blockSummary))
+    print("*\tStarting Offense: \t{} \tStarting Defense: \t{}".format(startingOffSummary, startingDefSummary))
+    print("*\tBench Offense: \t\t{}  \tBench Defense: \t\t{}".format(benchOffSummary, benchDefSummary))
+    print("*\tPassing Report\t\t{} \tBlocking Report: \t{}".format(passingSummary, blockSummary))
     print("*")
     print("*******************************************************")
 
