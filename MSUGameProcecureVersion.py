@@ -12,7 +12,7 @@ nameList8 = ["Red", "Gerard", "Caleb", "Cameron", "Clyde", "Duane", "Dudley", "E
 nameList9 = ["Hacksaw", "Bonesaw", "Ace", "Psycho", "Scott", "Logan", "Guido", "Mario", "Luigi", "Dean"]
 nameList = nameList1 + nameList2 + nameList3 + nameList4 + nameList5 + nameList6 + nameList7 + nameList8 + nameList9
 
-opponentList = ["CMU", "Indiana", "Illinois", "Purdue", "Ohio State", "Wisconson", "Minnisota", "Northwestern", "Iowa", "UofM"]
+opponentList = ["Toledo", "CMU", "UofD", "Oakland", "Notre Dame", "Indiana", "Illinois", "Purdue", "Ohio State", "Wisconson", "Minnisota", "Northwestern", "Iowa", "UofM"]
 NAME = 0                # type string - first name
 POSITION = 1            # type string - name of position
 OFFENSE = 2             # integer [1..10] -  offense scoring factor (not known to game player)
@@ -357,8 +357,15 @@ def updateTeamOffDefStats(team, resultList):
             benchOffense += player[OFFENSE]
             benchDefense += player[DEFENSE]
             rotationCount += 1
-    benchOffense = benchOffense / rotationCount
-    benchDefense = benchDefense / rotationCount
+    if rotationCount > 0:
+        benchOffense = benchOffense / rotationCount
+        benchDefense = benchDefense / rotationCount
+    else:
+
+
+
+        benchOffense = 0
+        benchDefense = 0
 
     assistFactor = (2*teamAssistMax + teamAssist)/3
 
@@ -402,7 +409,11 @@ class opponentInfo:
         self.opponentDefense = 0
         self.wins = 0
 
-        section = random.randint(1, 10)
+        if gameNumber < 5:
+            section = random.randint(1, 7)
+        else:
+            section = random.randint(1, 10)
+
         if section == 1:
             self.opponentOffense = 2.7 + random.random()
         elif section < 4:
@@ -1067,7 +1078,7 @@ for year in range(1, 21):
     teamWins = 0
     teamLoses = 0
     playGreenAndWhiteGame(team)
-    for gameNumber in range(1, 11):
+    for gameNumber in range(1, 15):
         opponent = opponentInfo(gameNumber)  # create opponent
         print("*")
         print("*\tNext Game against {}".format(opponentList[gameNumber-1]))
